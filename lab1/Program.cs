@@ -1,96 +1,98 @@
-﻿namespace Classes;
+namespace Classes;
 
-public class Transaction
+public enum GameResult
 {
-  public decimal Amount { get; }
-  public DateTime Date { get; }
-  public string Note { get; }
-  public Transaction(decimal amount, DateTime date, string note)
-  {
-    this.Amount = amount;
-    this.Date = date;
-    this.Note = note;
-  }
+  Win,
+  Loss
+}
 
+public static class Constants
+{
+  public const int MinRating = 1; // рейтинг не може стати менше 1
+  public const string NegativeRatingExceptionMessage = "Рейтинг не може бути негативним";
+}
+
+public class Game
+{
+  public string OpponentName { get; }
+  public decimal Rating { get; }
+  public GameResult Result { get; }
+
+  public Game(string opponentName, decimal rating, GameResult result)
+  {
+    this.OpponentName = opponentName;
+    this.Rating = rating;
+    this.Result = result;
+  }
 }
 
 
-public class BankAccount
+public class GameAccount
 {
-  private static int acountNumberSeed = 123456789;
-  private List<Transaction> allTransations = new List<Transaction>();
+  public string UserName { get; }
+  public decimal CurrentRating { get; set; }
 
-  public string Number { get; }
-  public string Owner { get; }
+  public decimal GamesCount { get; }
 
-  public decimal Balance
+  public List<Game> Games = new List<Game>();
+
+  public GameAccount(string userName, decimal currentRating, decimal gamesCount)
   {
-    get
-    {
-      decimal balance = 0;
-
-      foreach (var item in allTransations)
-      {
-        balance += item.Amount;
-      }
-
-      return balance;
-    }
+    this.UserName = userName;
+    this.CurrentRating = currentRating;
+    this.GamesCount = gamesCount;
   }
 
 
-  public BankAccount(string name, decimal initialBalance)
+  public void WinGame(string opponentName, decimal rating)
   {
-    this.Number = acountNumberSeed.ToString();
-    acountNumberSeed++;
+    // рейтинг, на який грають не може бути від'ємним - кидаємо помилку
+    if (rating < 0)
+    {
+      throw new ArgumentOutOfRangeException(nameof(rating), $"{Constants.NegativeRatingExceptionMessage}");
+    }
 
-    this.Owner = name;
-    MakeDeposit(initialBalance, DateTime.Now, "Initial balance");
+    this.CurrentRating += rating;
+
+    var game = new Game(opponentName, rating, GameResult.Win);
+    Games.Add(game);
+
   }
 
-
-
-
-  public void MakeDeposit(decimal amount, DateTime date, string note)
+  public void LoseGame(string opponentName, decimal rating)
   {
-    if (amount <= 0)
+    // рейтинг, на який грають не може бути від'ємним - кидаємо помилку
+    if (rating < 0)
     {
-      throw new ArgumentOutOfRangeException(nameof(amount), "first error");
+      throw new ArgumentOutOfRangeException(nameof(rating), $"{Constants.NegativeRatingExceptionMessage}");
     }
 
-    var deposit = new Transaction(amount, date, note);
-    allTransations.Add(deposit);
+    var currentgRatinAfterLoss = this.CurrentRating - rating;
+    if (currentgRatinAfterLoss <= Constants.MinRating) // рейтинг не може стати менше 1
+    {
+      this.CurrentRating = Constants.MinRating;
+    }
+    else
+    {
+      this.CurrentRating = currentgRatinAfterLoss;
+    }
+
+    var game = new Game(opponentName, rating, GameResult.Loss);
+    Games.Add(game);
   }
 
-
-  public void MakeWithdrawal(decimal amount, DateTime date, string note)
+  public string GetStats()
   {
-    if (amount <= 0)
+    var history = new System.Text.StringBuilder();
+
+    history.AppendLine("Opponent\tResult\tRate\tIndex");
+
+    for (int i = 0; i < Games.Count; i++)
     {
-      throw new ArgumentOutOfRangeException(nameof(amount), "second error");
+      history.AppendLine($"{Games[i].OpponentName}\t{Games[i].Result}\t{Games[i].Rating}\t{i}");
     }
 
-    if (Balance - amount < 0)
-    {
-      throw new InvalidOperationException("third error");
-    }
-
-    var withdrawal = new Transaction(-amount, date, note);
-    allTransations.Add(withdrawal);
-  }
-
-  public string GetAccountHistory()
-  {
-    var report = new System.Text.StringBuilder();
-
-    decimal balance = 0;
-    report.AppendLine("Date\tAmount\tBalance\tNote");
-    foreach (var item in allTransations)
-    {
-      balance += item.Amount;
-      report.AppendLine($"{item.Date.ToShortDateString()}\t{item.Amount}\t{balance}\t{item.Note}");
-    }
-    return report.ToString();
+    return history.ToString();
   }
 }
 
@@ -99,16 +101,29 @@ class Program
 {
   static void Main(string[] args)
   {
-    // Create a bank account
-    BankAccount account = new BankAccount("John Doe", 1000.00m);
+    // Create a games accounts
+    GameAccount firstPlayer = new GameAccount("John Biolo", 0, Constants.MinRating);
+    GameAccount secondPlayer = new GameAccount("Alex Brits", 0, Constants.MinRating);
 
-    // Make some deposits and withdrawals
-    account.MakeDeposit(500.00m, DateTime.Now, "Salary");
-    account.MakeWithdrawal(200.00m, DateTime.Now, "Groceries");
-    account.MakeDeposit(300.00m, DateTime.Now, "Bonus");
+    // Game 1: first win
+    firstPlayer.WinGame(secondPlayer.UserName, 120);
+    secondPlayer.LoseGame(firstPlayer.UserName, 120);
 
-    // Display account history in the console
-    Console.WriteLine("Account History:");
-    Console.WriteLine(account.GetAccountHistory());
+    // Game 2: second win
+    firstPlayer.LoseGame(secondPlayer.UserName, 350);
+    secondPlayer.WinGame(firstPlayer.UserName, 350);
+
+    // Game 3: second win
+    firstPlayer.LoseGame(secondPlayer.UserName, 500);
+    secondPlayer.WinGame(firstPlayer.UserName, 500);
+
+    // Display games history in the console:
+    // first player
+    Console.WriteLine($"Game History of first player - {firstPlayer.UserName}:");
+    Console.WriteLine(firstPlayer.GetStats());
+
+    // second player
+    Console.WriteLine($"Game History of second player - {secondPlayer.UserName}:");
+    Console.WriteLine(secondPlayer.GetStats());
   }
 }
