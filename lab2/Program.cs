@@ -49,7 +49,7 @@
     }
   }
 
-  // Треновочна гра
+  // Тренвуальна гра
   public class TrainingGame : GameBase
   {
     public TrainingGame(string opponentName, GameResult result) : base(opponentName, result)
@@ -258,13 +258,13 @@
   {
     static void Main(string[] args)
     {
-      // Створитення різних акаунтів
+      // Створення різних акаунтів
       GameAccountBase firstPlayer = new StandardGameAccount("John Smiths", Constants.MinRating);
       GameAccountBase secondPlayer = new StandardGameAccount("Mark Stone", Constants.MinRating);
       GameAccountBase thirdPlayer = new WinStreakGameAccount("Liam Breklo", Constants.MinRating);
       GameAccountBase forthPlayer = new DoublePointsForLossAccount("Emma Parks", Constants.MinRating);
 
-      // Створитення факторі ігор
+      // Створення факторі ігор
       GameFactory gameFactory = new GameFactory();
 
       // Ігра 1: перший ігрок перемогає другого в стандартній грі
@@ -283,7 +283,7 @@
       forthPlayer.WinGame(gameFactory.CreateGame(GameType.DoublePoints, secondPlayer.UserName, GameResult.Win));
       secondPlayer.LoseGame(gameFactory.CreateGame(GameType.DoublePoints, forthPlayer.UserName, GameResult.Loss));
 
-      // Виведення історії всіх ігроків
+      // Виведення історій всіх ігроків
       Console.WriteLine($"\nGame History and Stats of first player - {firstPlayer.UserName} with {firstPlayer.GetAccountType()}:");
 
       Console.WriteLine(firstPlayer.GetStats());
