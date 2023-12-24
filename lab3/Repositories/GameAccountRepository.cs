@@ -1,43 +1,47 @@
 using Classes.Accounts;
+using Classes.Constants;
 using Classes.Data;
+using Classes.Enums;
 
 namespace Classes.Repositories
 {
   public interface IGameAccountRepository
   {
-    GameAccountBase CreatePlayer(string userName, decimal currentRating);
+    GameAccountBase CreateGameAccount(GameAccountType gameAccountType, string userName, decimal currentRating);
 
-    GameAccountBase PlayerById(decimal accountId);
+    GameAccountBase GameAccountId(decimal accountId);
 
-    IEnumerable<GameAccountBase> ReadAllPlayers();
+    IEnumerable<GameAccountBase> ReadAllGameAccounts();
   }
 
   public class GameAccountRepository : IGameAccountRepository
   {
-    private readonly DbContext dbContext;
+    private readonly DbContext _dbContext;
+    private readonly GameAccountFactory _gameAccountFactory = new GameAccountFactory();
 
     public GameAccountRepository(DbContext dbContext)
     {
-      this.dbContext = dbContext;
+      _dbContext = dbContext;
     }
 
-    public GameAccountBase CreatePlayer(string userName, decimal currentRating)
+    public GameAccountBase CreateGameAccount(GameAccountType gameAccountType, string userName, decimal currentRating)
     {
-      var playerId = dbContext.GameAccounts.Count + 1;
-      var player = new StandardGameAccount(playerId, userName, currentRating);
-      dbContext.GameAccounts.Add(player);
+      var gameAccountId = _dbContext.GameAccounts.Count + 1;
+      var gameAccount = _gameAccountFactory.CreateGameAccount(gameAccountId, gameAccountType, userName, currentRating);
+      _dbContext.GameAccounts.Add(gameAccount);
 
-      return player;
+      return gameAccount;
     }
 
-    public GameAccountBase PlayerById(decimal accountId)
+    public GameAccountBase GameAccountId(decimal accountId)
     {
-      return dbContext.GameAccounts.FirstOrDefault(p => p.AccountId == accountId);
+      return _dbContext.GameAccounts.FirstOrDefault(p => p.AccountId == accountId) ??
+             throw new InvalidOperationException(ExceptionMessages.NotFoundGameAccountExceptionMessage);
     }
 
-    public IEnumerable<GameAccountBase> ReadAllPlayers()
+    public IEnumerable<GameAccountBase> ReadAllGameAccounts()
     {
-      return dbContext.GameAccounts;
+      return _dbContext.GameAccounts;
     }
   }
 }

@@ -12,4 +12,11 @@ namespace Classes.Enums
     DoublePoints,
     Training
   }
+
+  public enum GameAccountType
+  {
+    Standard,
+    DoublePointsForLoss,
+    WinStreak
+  }
 }

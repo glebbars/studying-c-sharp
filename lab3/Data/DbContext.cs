@@ -7,6 +7,5 @@ namespace Classes.Data
   {
     public List<GameAccountBase> GameAccounts { get; } = new List<GameAccountBase>();
     public List<GameBase> Games { get; } = new List<GameBase>();
-    public GameFactory GameFactory { get; } = new GameFactory();
   }
 }

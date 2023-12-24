@@ -10,31 +10,31 @@ namespace Classes.Services
 
     IEnumerable<GameBase> GetAllGames();
 
-    IEnumerable<GameBase> GetGamesByPlayerId(decimal accountId);
+    IEnumerable<GameBase> GetGamesByGameAccountId(decimal accountId);
   }
 
   public class GameService : IGameService
   {
-    private readonly IGameRepository gameRepository;
+    private readonly IGameRepository _gameRepository;
 
     public GameService(IGameRepository gameRepository)
     {
-      this.gameRepository = gameRepository;
+      this._gameRepository = gameRepository;
     }
 
     public GameBase CreateGame(GameType gameType, string opponentName, GameResult result)
     {
-      return gameRepository.CreateGame(gameType, opponentName, result);
+      return _gameRepository.CreateGame(gameType, opponentName, result);
     }
 
     public IEnumerable<GameBase> GetAllGames()
     {
-      return gameRepository.ReadAllGames();
+      return _gameRepository.ReadAllGames();
     }
 
-    public IEnumerable<GameBase> GetGamesByPlayerId(decimal accountId)
+    public IEnumerable<GameBase> GetGamesByGameAccountId(decimal accountId)
     {
-      return gameRepository.ReadGamesByPlayerId(accountId);
+      return _gameRepository.ReadGamesByGameAccountId(accountId);
     }
   }
 }

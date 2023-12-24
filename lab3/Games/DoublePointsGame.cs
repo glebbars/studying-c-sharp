@@ -11,7 +11,7 @@ namespace Classes.Games
 
     public override decimal CalculateRating()
     {
-      return GlobalConstants.StandardGameRating * 2;
+      return GameConstants.StandardGameRating * 2;
     }
   }
 }

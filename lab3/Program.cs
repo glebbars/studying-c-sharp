@@ -1,7 +1,6 @@
 ﻿using Classes.Constants;
 using Classes.Data;
 using Classes.Enums;
-using Classes.GameServices;
 using Classes.Repositories;
 using Classes.Services;
 
@@ -11,74 +10,51 @@ namespace Classes
   {
     private static void Main()
     {
-      // var dbContext = new DbContext();
-      // var gameAccountRepository = new GameAccountRepository(dbContext);
-      // var gameRepository = new GameRepository(dbContext);
-      //
-      // var accountService = new GameAccountService(gameAccountRepository);
-      // var gameService = new GameService(gameRepository);
-      //
-      // var firstPlayer = accountService.CreateAccount("John Smiths", GlobalConstants.MinRating);
-      // var secondPlayer = accountService.CreateAccount("Mark Stone", GlobalConstants.MinRating);
-      // var thirdPlayer = accountService.CreateAccount("Liam Beale", GlobalConstants.MinRating);
-      // var forthPlayer = accountService.CreateAccount("Emma Parks", GlobalConstants.MinRating);
-      //
-      // gameService.CreateGame(GameType.Standard, secondPlayer.UserName, GameResult.Win);
-      // gameService.CreateGame(GameType.Standard, firstPlayer.UserName, GameResult.Loss);
-      // gameService.CreateGame(GameType.DoublePoints, thirdPlayer.UserName, GameResult.Win);
-      // gameService.CreateGame(GameType.DoublePoints, forthPlayer.UserName, GameResult.Loss);
-      // gameService.CreateGame(GameType.Training, firstPlayer.UserName, GameResult.Win);
-      // gameService.CreateGame(GameType.Training, thirdPlayer.UserName, GameResult.Loss);
-      // gameService.CreateGame(GameType.DoublePoints, secondPlayer.UserName, GameResult.Win);
-      // gameService.CreateGame(GameType.DoublePoints, forthPlayer.UserName, GameResult.Loss);
-      //
-      // Console.WriteLine("List of all players:");
-      // foreach (var player in accountService.GetAllAccounts())
-      //   Console.WriteLine($"{player.AccountId}: {player.UserName}, Rating: {player.CurrentRating}");
-      //
-      // Console.WriteLine("\nList of all games:");
-      // foreach (var game in gameService.GetAllGames())
-      //   Console.WriteLine($"{game.OpponentName}, Result: {game.Result}, Rating: {game.CalculateRating()}");
-      //
-      // Console.WriteLine(
-      //   $"\nGame History and Stats of first player - {firstPlayer.UserName} with {firstPlayer.GetAccountType()}:");
-      // foreach (var game in gameService.GetGamesByPlayerId(firstPlayer.AccountId))
-      //   Console.WriteLine($"{game.OpponentName}: {game.Result}, Rating: {game.CalculateRating()}");
-      //
-      // Console.WriteLine(firstPlayer.GetStats());
-
       var dbContext = new DbContext();
-      var playerRepository = new GameAccountRepository(dbContext);
+      var gameAccountRepository = new GameAccountRepository(dbContext);
       var gameRepository = new GameRepository(dbContext);
-      var gameService = new GameService2(playerRepository, gameRepository);
 
-      var firstPlayer = playerRepository.CreatePlayer("John Smiths", GlobalConstants.MinRating);
-      var secondPlayer = playerRepository.CreatePlayer("Mark Stone", GlobalConstants.MinRating);
-      var thirdPlayer = playerRepository.CreatePlayer("Liam Beale", GlobalConstants.MinRating);
-      var forthPlayer = playerRepository.CreatePlayer("Emma Parks", GlobalConstants.MinRating);
+      var gameService = new GameService(gameRepository);
+      var gameAccountService = new GameAccountService(gameAccountRepository);
 
-      // Play games using the GameService
-      gameService.PlayGame(firstPlayer, secondPlayer, GameType.Standard, GameResult.Win);
-      gameService.PlayGame(firstPlayer, secondPlayer, GameType.Standard, GameResult.Loss);
-      gameService.PlayGame(thirdPlayer, forthPlayer, GameType.DoublePoints, GameResult.Win);
-      gameService.PlayGame(thirdPlayer, forthPlayer, GameType.DoublePoints, GameResult.Loss);
-      gameService.PlayGame(firstPlayer, thirdPlayer, GameType.Training, GameResult.Win);
-      gameService.PlayGame(firstPlayer, thirdPlayer, GameType.Training, GameResult.Loss);
-      gameService.PlayGame(secondPlayer, forthPlayer, GameType.DoublePoints, GameResult.Win);
-      gameService.PlayGame(secondPlayer, forthPlayer, GameType.DoublePoints, GameResult.Loss);
+      var firstGameAccount = gameAccountService.CreateAccount(GameAccountType.Standard, "John Smiths", GameConstants.MinRating);
+      var secondGameAccount = gameAccountService.CreateAccount(GameAccountType.WinStreak, "Mark Stone", GameConstants.MinRating);
+      var thirdGameAccount =
+        gameAccountService.CreateAccount(GameAccountType.DoublePointsForLoss, "Liam Beale", GameConstants.MinRating);
+      var forthGameAccount = gameAccountService.CreateAccount(GameAccountType.Standard, "Emma Parks", GameConstants.MinRating);
 
-      Console.WriteLine("List of all players:");
-      foreach (var player in playerRepository.ReadAllPlayers())
-        Console.WriteLine($"{player.AccountId}: {player.UserName}, Rating: {player.CurrentRating}");
+      // Game 1
+      firstGameAccount.WinGame(gameService.CreateGame(GameType.Standard, secondGameAccount.UserName, GameResult.Win));
+      secondGameAccount.LoseGame(gameService.CreateGame(GameType.Standard, firstGameAccount.UserName, GameResult.Loss));
+
+      // Game 2
+      secondGameAccount.WinGame(gameService.CreateGame(GameType.Training, GameConstants.TrainingGameOpponentName, GameResult.Win));
+
+      // Game 3
+      forthGameAccount.WinGame(gameService.CreateGame(GameType.DoublePoints, thirdGameAccount.UserName, GameResult.Win));
+      thirdGameAccount.LoseGame(gameService.CreateGame(GameType.DoublePoints, forthGameAccount.UserName, GameResult.Loss));
+
+      // Game 4
+      secondGameAccount.WinGame(gameService.CreateGame(GameType.Standard, forthGameAccount.UserName, GameResult.Win));
+      forthGameAccount.LoseGame(gameService.CreateGame(GameType.Standard, secondGameAccount.UserName, GameResult.Loss));
+
+
+      Console.WriteLine("List of all game accounts:");
+      foreach (var gameAccount in gameAccountService.GetAllAccounts())
+        Console.WriteLine($"{gameAccount.AccountId}: {gameAccount.UserName}, Rating: {gameAccount.CurrentRating}");
 
       Console.WriteLine("\nList of all games:");
-      foreach (var game in gameRepository.ReadAllGames())
+      foreach (var game in gameService.GetAllGames())
         Console.WriteLine($"{game.OpponentName}, Result: {game.Result}, Rating: {game.CalculateRating()}");
 
-      // Retrieve and display player stats using the GameService
+      // Retrieve and display gameAccount stats using the GameService
       Console.WriteLine(
-        $"\nGame History and Stats of first player - {firstPlayer.UserName} with {firstPlayer.GetAccountType()}:");
-      Console.WriteLine(gameService.GetPlayerStats(firstPlayer));
+        $"\nGame History and Stats of first game accounts - {firstGameAccount.UserName} with {firstGameAccount.GetAccountType()}:");
+      Console.WriteLine(gameAccountService.GetAccountById(firstGameAccount.AccountId).GetStats());
+
+      Console.WriteLine(
+        $"\nGame History and Stats of second game accounts - {secondGameAccount.UserName} with {firstGameAccount.GetAccountType()}:");
+      Console.WriteLine(gameAccountService.GetAccountById(secondGameAccount.AccountId).GetStats());
     }
   }
 }

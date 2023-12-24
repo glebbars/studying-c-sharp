@@ -25,7 +25,7 @@ namespace Classes.Accounts
     {
       if (rating < 0)
       {
-        throw new ArgumentOutOfRangeException(nameof(rating), $"{GlobalConstants.NegativeRatingExceptionMessage}");
+        throw new ArgumentOutOfRangeException(nameof(rating), $"{ExceptionMessages.NegativeRatingExceptionMessage}");
       }
     }
 
@@ -33,7 +33,7 @@ namespace Classes.Accounts
     {
       if (gameResult != correctGameResult)
       {
-        throw new ArgumentException($"{GlobalConstants.IncorrectGameResultArgumentMessage}", nameof(gameResult));
+        throw new ArgumentException($"{ExceptionMessages.IncorrectGameResultArgumentMessage}", nameof(gameResult));
       }
     }
 
@@ -41,9 +41,9 @@ namespace Classes.Accounts
     {
       var currentRatingAfterLoss = CurrentRating - lostRating;
 
-      if (currentRatingAfterLoss <= GlobalConstants.MinRating)
+      if (currentRatingAfterLoss <= GameConstants.MinRating)
       {
-        return GlobalConstants.MinRating;
+        return GameConstants.MinRating;
       }
 
       return currentRatingAfterLoss;
