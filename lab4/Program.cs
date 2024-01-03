@@ -39,8 +39,16 @@ namespace Classes
 
       AddMocks(gameAccountService, gameService);
 
-
       Console.WriteLine("\n\nWelcome to the game UI!");
+
+      Dictionary<int, (string commandInfo, Action command)> uiCommands = new Dictionary<int, (string, Action)>
+      {
+        { 1, ("Create a game account", GameAccountsUI.CreateGameAccount) },
+        { 2, ("Play a game", GameUI.CreateGame) },
+        { 3, ("Print the list of players", GameAccountsUI.ShowAllGameAccounts) },
+        { 4, ("Print the list of games", GameUI.ShowAllGames) },
+        { 5, ("Exit", () => Environment.Exit(0)) }
+      };
 
       while (true)
       {
@@ -49,32 +57,13 @@ namespace Classes
 
         var choice = Console.ReadLine();
 
-        switch (choice)
+        if (int.TryParse(choice, out var option) && uiCommands.ContainsKey(option))
         {
-          case "1":
-            GameAccountsUI.CreateGameAccount();
-
-            break;
-          case "2":
-            GameUI.CreateGame();
-
-            break;
-          case "3":
-            GameAccountsUI.ShowAllGameAccounts();
-
-            break;
-          case "4":
-            GameUI.ShowAllGames();
-
-            break;
-          case "5":
-            Environment.Exit(0);
-
-            break;
-          default:
-            Console.WriteLine("\nWrong input. Try something else.");
-
-            break;
+          uiCommands[option].command();
+        }
+        else
+        {
+          Console.WriteLine("\nWrong input. Try something else.");
         }
       }
     }
