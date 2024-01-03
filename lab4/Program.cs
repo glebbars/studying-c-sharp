@@ -52,14 +52,18 @@ namespace Classes
 
       while (true)
       {
-        Console.WriteLine(
-          "\n-----------------\n1. Create a game account\n2. Play a game\n3. Print the list of players\n4. Print the list of games\n5. Exit\n\nChoose an option: ");
+        Console.WriteLine("\n-----------------");
+
+        foreach (var (optionToPrint, (commandInfo, _)) in uiCommands)
+          Console.WriteLine($"{optionToPrint}. {commandInfo}");
+
+        Console.Write("\nChoose an option: ");
 
         var choice = Console.ReadLine();
 
-        if (int.TryParse(choice, out var option) && uiCommands.ContainsKey(option))
+        if (int.TryParse(choice, out var optionToChoose) && uiCommands.ContainsKey(optionToChoose))
         {
-          uiCommands[option].command();
+          uiCommands[optionToChoose].command();
         }
         else
         {
