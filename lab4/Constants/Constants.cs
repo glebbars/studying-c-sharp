@@ -9,7 +9,7 @@ public static class GameConstants
 {
     public const int MinRating = 1;
     public const short StandardGameRating = 100;
-    public const string TrainingGameOpponentName = "Training Game";
+    public const string TrainingGameOpponentName = "Training Opponent";
 }
 
 public static class ExceptionMessages
